@@ -558,6 +558,7 @@ void saveDataToFile( struct memberProfile * members, int total){
                 t->tm_mon + 1,
                 t->tm_year + 1900);
         }
+        printf("Export successfully\n");
         fclose(fptr);
     }
 }
