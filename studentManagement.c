@@ -1,579 +1,279 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
-#include <time.h>
-struct memberProfile{
-    char memberId[10];
-    char fullName[30];
-    int birthYear;
-    char memberType[30];
-    time_t registerTime;
+struct studentInfor{
+    char studentName[100];
+    int studentAge;
+    char studentId[100];
 };
-struct trainerProfile{
-    char trainerID[10];
-    char trainerName[30];
-    // char specialty[20];
-    // char assignedMemberId[10];
-    // double monthlyFee;
-};
-int numberOfTrainer = 10;
-struct trainerProfile trainerList[10] = {
-    {"T001", "An"},
+
+void displayMenu(int total, struct studentInfor studentsList[]){
+    for(int i = 0; i < total; i++){
+        printf("Name: %s | Age: %d | ID: %s\n",
+           studentsList[i].studentName,
+           studentsList[i].studentAge,
+           studentsList[i].studentId);
+    }
+}
+
+void addStudent(int *total, struct studentInfor studentsList[]){
+    int num;
+    printf("Enter the number of student: ");
+    scanf("%d", &num);
+    while(num < 0){
+        printf("AGAIN\n");
+        printf("Enter the number of student: ");
+        scanf("%d", &num);
+    }
+    getchar();
+    if(num == 0){
+        printf("Cancelled adding student. Returning to menu.\n");
+        return; //Exit
+    }
+    if(num > 0){
+        for(int i = 0; i < num; i++){
+            
+            printf("Enter the name of #%d student: ",i+1);
+            fgets(studentsList[*total].studentName, sizeof(studentsList[*total].studentName), stdin);
+            studentsList[*total].studentName[strcspn(studentsList[*total].studentName, "\n")] = '\0';
+
+            printf("Enter the age of #%d student: ",i+1); 
+            scanf("%d", &studentsList[*total].studentAge);
+            getchar();
+
+            printf("Enter the id of #%d student: ",i+1); 
+            fgets(studentsList[*total].studentId, sizeof(studentsList[*total].studentId), stdin);
+            studentsList[*total].studentId[strcspn(studentsList[*total].studentId, "\n")] = '\0';
+            (*total) ++;
+        }
+    }
     
-    {"T002", "Binh"}
-};
-void clearBuffer();
-void displayMenu();
-int inputChoice();
-void displayMemberMenu();
-void addMember(int size, int*total, struct memberProfile **members);
-void displayAllMember(int total, struct memberProfile*members);
-int searchMemberById(char findId[10], int total, struct memberProfile* members);
-int searchMemberByName(char findName[30], int total, struct memberProfile * members);
-int searchTrainerById(char findId[10], int size, struct trainerProfile trainerList[]);
-void displayMember(int i, struct memberProfile * members);
-void displaySortMenu();
-int inputMemberChoice();
-int inputSortChoice();
-void sortMemberByBirthYearYoung_to_old(struct memberProfile * members, int total);
-void sortMemberByBirthYearOlder_to_young(struct memberProfile * members, int total);
-void sortByDateLastest(struct memberProfile * members, int total);
-void sortByDateOldest(struct memberProfile * members, int total);
-void displayFileMenu();
-int inputFileChoice();
-void displayTrainerMenu();
-int inputTrainerChoice();
-void displaySearchmenu();
-int inputSearchChoice();
-void displayTrainer(int idx, struct trainerProfile trainerList[]);
-void saveDataToFile( struct memberProfile * members, int total);
-int main(){
-    int choice;
-    int total = 0;
-    struct memberProfile * members = NULL;
-    do{
-        displayMenu();
-        choice = inputChoice();
+}
+
+void searching(struct studentInfor studentsList[], int total){
+    char id[100];
+    int isFound = 0;
+    printf("Enter id: ");
+    fgets(id, sizeof(id), stdin);
+    id[strcspn(id, "\n")] = '\0';
+    while(strlen(id) <= 0){
+        printf("AGAIN\n");
+        printf("Enter id: ");
+        fgets(id, sizeof(id), stdin);
+        id[strcspn(id, "\n")] = '\0';
+    }
+    for(int i = 0; i < total; i++){
+        if(strcmp(id, studentsList[i].studentId) == 0){
+            printf("Its found\n");
+            printf("%s  |   %s  |   %d\n", 
+                studentsList[i].studentId, 
+                studentsList[i].studentName, 
+                studentsList[i].studentAge);
+                isFound = 1;
+            break;
+        }
+    }
+    if(isFound ==0){
+        printf("Not found the id: %s\n", id);
+    }
+}
+
+void editing(struct studentInfor studentsList[], int total){
+    char id[100]; char name[100];
+    int searchingMethod;
+    printf("SEARCH METHOD\n");
+    printf("1. Searching by id\n");
+    printf("2. Searching by Name\n");
+    printf("Enter your choice(1-2): ");
+    scanf("%d", &searchingMethod);
+    getchar();
+    if(searchingMethod == 1){
+        int option;
+        printf("Enter the searching id: ");
+        fgets(id, sizeof(id), stdin);
+        id[strcspn(id, "\n")] = '\0';
+        printf("1. Id\n");
+        printf("2. Name\n");
+        printf("3. Age\n");
+        printf("Enter the editing option: ");
+        scanf("%d", &option);
+        getchar();
+        if(option == 1){
+            char newId[100];
+            printf("Enter the new id: ");
+            fgets(newId, sizeof(newId), stdin);
+            newId[strcspn(newId, "\n")] = '\0';
+            for(int i = 0; i < total; i++){
+                if(strcmp(id, studentsList[i].studentId) == 0){
+                    strcpy(studentsList[i].studentId, newId);
+                    break;
+                }
+            }
+        }
+        else if(option == 2){
+            char newName[100];
+            printf("Enter the new name: ");
+            fgets(newName, sizeof(newName), stdin);
+            newName[strcspn(newName, "\n")] = '\0';
+            for(int i = 0; i < total; i++){
+                if(strcmp(studentsList[i].studentId, id) == 0){
+                   strcpy(studentsList[i].studentName, newName);
+                   break; 
+                }
+            }
+        }
+        else if(option == 3){
+            int newAge;
+            printf("Enter the new age: ");
+            scanf("%d", &newAge);
+            getchar();
+            for(int i = 0; i < total; i++){
+                if(strcmp(studentsList[i].studentId, id) == 0){
+                    studentsList[i].studentAge = newAge;
+                    break;
+                }
+            }
+        }
+    }
+    if(searchingMethod == 2){
+        int option;
+        printf("Enter the searching name: ");
+        fgets(name, sizeof(name), stdin);
+        name[strcspn(name, "\n")] = '\0';
+        printf("1. Id\n");
+        printf("2. Name\n");
+        printf("3. Age\n");
+        printf("Enter the editing option: ");
+        scanf("%d", &option);
+        getchar();
+        if(option == 1){
+            char newId[100];
+            printf("Enter the new id: ");
+            fgets(newId, sizeof(newId), stdin);
+            newId[strcspn(newId, "\n")] = '\0';
+            for(int i = 0; i < total; i++){
+                if(strcmp(name, studentsList[i].studentName) == 0){
+                    strcpy(studentsList[i].studentId, newId);
+                    break;
+                }
+            }
+        }
+        else if(option == 2){
+            char newName[100];
+            printf("Enter the new name: ");
+            fgets(newName, sizeof(newName), stdin);
+            newName[strcspn(newName, "\n")] = '\0';
+            for(int i = 0; i < total; i++){
+                if(strcmp(name, studentsList[i].studentName) == 0){
+                   strcpy(studentsList[i].studentName, newName);
+                   break; 
+                }
+            }
+        }
+        else if(option == 3){
+            int newAge;
+            printf("Enter the new age: ");
+            scanf("%d", &newAge);
+            getchar();
+            for(int i = 0; i < total; i++){
+                if(strcmp(name, studentsList[i].studentName) == 0){
+                    studentsList[i].studentAge = newAge;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void removing(struct studentInfor studentsList[], int*total){
+    char removeId[100];
+    int size = *total;
+    int isFound = 0;
+    printf("Enter the id: ");
+    fgets(removeId, sizeof(removeId), stdin);
+    removeId[strcspn(removeId, "\n")] = '\0';
+    
+    for(int i = 0; i < size; i++){
+        if(strcmp(removeId, studentsList[i].studentId) == 0){
+            for(int j = i; j < size-1; j++){
+                studentsList[j] = studentsList[j+1];
+            }
+        (*total) -- ;
+        isFound = 1;
+        printf("SUCCESFULLY\n");
+        return;
+        }
+    }
+    if(isFound == 0){
+        printf("NOT FOUNd\n");
+    }
+}
+
+void CreatingFile(struct studentInfor studentsList[], int total){
+    FILE * fptr;
+    fptr = fopen("Project1.txt", "w");
+    if (!fptr) {
+    printf("Cannot create file.\n");
+    return;
+}
+    for(int i = 0; i < total; i ++){
+        fprintf(fptr, "%s              %s             %d\n", studentsList[i].studentId, studentsList[i].studentName, studentsList[i].studentAge);
+    }
+    fclose(fptr);
+}
+
+void myMenu(int choice, int *total, struct studentInfor studentsList[]){
+    while(choice != 7){
         if(choice == 1){
-            int memberChoice;
-            displayMemberMenu();
-            memberChoice = inputMemberChoice();
-            if(memberChoice == 1){
-                int n;
-                printf("How many members: ");
-                scanf("%d",&n);
-                clearBuffer();
-                addMember(n, &total, &members);
-            }
-            else if(memberChoice == 3){
-                int sortChoice;
-                displaySortMenu();
-                sortChoice = inputSortChoice();
-                if(sortChoice ==1){
-                    sortMemberByBirthYearYoung_to_old(members, total);
-                }
-                else if(sortChoice == 2){
-                    sortMemberByBirthYearOlder_to_young(members, total);
-                }
-                else if(sortChoice == 3){
-                    sortByDateLastest(members, total);
-                }
-                else if(sortChoice == 4){
-                    sortByDateOldest(members, total);
-
-                }
-                else if(sortChoice == 0){}
-                else{
-                    printf("***PLEASE select 1 or 2, try again!\n");
-                }
-
-            }
-            else if(memberChoice == 4){
-                int searchChoice;
-                displaySearchmenu();
-                searchChoice = inputSearchChoice();
-                if(searchChoice == 1){
-                    char findId[10];
-                    printf("Enter ID you want to find: ");
-                    fgets(findId, sizeof(findId), stdin);
-                    findId[strcspn(findId, "\n")] = '\0';
-                    //Linear search với findId
-                    int index = searchMemberById(findId, total, members);
-                    if(index!= -1){
-                        displayMember(index, members);
-                    }
-                    else{
-                        printf("This id is not exist\n");
-                    }
-                }
-                else if(searchChoice == 2){
-                    char findName[30];
-                    printf("Enter the name you want to find: ");
-                    fgets(findName, sizeof(findName), stdin);
-                    findName[strcspn(findName, "\n")]= '\0';
-                    int index = searchMemberByName(findName, total, members);
-                    if(index != -1){
-                        displayMember(index, members);
-                    }
-                    else{
-                        printf("This name is not exist\n");
-                    }
-                }
-                
-            }
-            else if(memberChoice == 0){
-
-            }
-            else{
-                printf("***PLEASE choose 1 of options in menu, try again!\n");
-            }
-        
+            addStudent(total, studentsList);
         }
         else if(choice == 2){
-            int trainerChoice;
-            displayTrainerMenu();
-            trainerChoice = inputTrainerChoice();
-            if(trainerChoice == 1){
-
-            }
-            else if(trainerChoice == 4){
-                int searchChoice;
-                displaySearchmenu();
-                searchChoice = inputSearchChoice();
-                if(searchChoice == 1){
-                    char findId[10];
-                    printf("Enter ID you want to find: ");
-                    fgets(findId, sizeof(findId), stdin);
-                    findId[strcspn(findId, "\n")] = '\0';
-                    int index = searchTrainerById(findId, numberOfTrainer, trainerList);
-                    if(index!= -1){
-                        displayTrainer(index, trainerList);
-                    }
-                    else{
-                        printf("This id is not exist\n");
-                    }
-                }
-            }
-            
-            
+            displayMenu(*total, studentsList);
         }
         else if(choice == 3){
-            displayAllMember(total, members);
+            searching(studentsList, *total);
         }
         else if(choice == 4){
-            int fileChoice;
-            displayFileMenu();
-            fileChoice = inputFileChoice();
-            if(fileChoice == 1){
-                saveDataToFile(members, total);
-            }
-            else if(fileChoice == 0){}
-            else{
-                printf("***PLEASE choose 1 of options in menu, try again!\n");
-            }
+            editing(studentsList, *total);
         }
-    }while(choice != 0);
-    
+        else if(choice == 5){
+            removing(studentsList, total);
+        }
+        else if(choice == 6){
+            CreatingFile(studentsList,* total);
+        }
+        printf("\n**********STUDENT MANAGEMENT**********\n");
+        printf("1. Add student\n");
+        printf("2. Display students\n");
+        printf("3. Search by ID\n");
+        printf("4. Edit student\n");
+        printf("5. Delete student\n");
+        printf("6. Export file\n");
+        printf("7. Exit\n");
+        printf("Enter your choice: "); 
+        scanf("%d", &choice);
+        getchar();
+    }
+}
 
 
+int main (){
+    struct studentInfor studentsList[100];
+    int total = 0;
+    int choice;
+    printf("\n**********STUDENT MANAGEMENT**********\n");
+    printf("1. Add student\n");
+    printf("2. Display students\n");
+    printf("3. Search by ID\n");
+    printf("4. Edit student\n");
+    printf("5. Delete student\n");
+    printf("6. Export file\n");
+    printf("7. Exit\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice); 
+    getchar();
+    myMenu(choice, &total, studentsList);
 
-
-
-
-    free(members);
-    members = NULL;
 
     return 0;
 }
-int inputFileChoice(){
-    int fileChoice;
-    printf("Enter file choice: ");
-    scanf("%d", &fileChoice);
-    clearBuffer();
-    return fileChoice;
-}
-int inputMemberChoice(){
-    int memberChoice;
-    printf("Enter your choice: ");
-    scanf("%d", &memberChoice);
-    clearBuffer();
-    return memberChoice;
-}
-int inputChoice(){
-    int choice;
-    printf("Enter your choice: ");
-    scanf("%d",&choice);
-    clearBuffer();
-    return choice;
-}
-int inputTrainerChoice(){
-    int trainerChoice;
-    printf("Enter your choice: ");
-    scanf("%d", &trainerChoice);
-    clearBuffer();
-    return trainerChoice;
-}
-int inputSortChoice(){
-    int sortChoice;
-    printf("Enter your choice: ");
-    scanf("%d", &sortChoice);
-    clearBuffer();
-    return sortChoice;
-}
-int inputSearchChoice(){
-    int searchChoice;
-    printf("Enter your choice: ");
-    scanf("%d", &searchChoice);
-    clearBuffer();
-    return searchChoice;
-}
-int isValidId(char id[]) {
-    char preFix[4] = "GYM";
-    if(strlen(id) >= 10 || strlen(id) == 0){
-        return 0;
-    }
-    //hàm strncmp sẽ so sánh 2 string như 2 số theo bảng mã ascii
-    else if(strlen(id) >=3 && strncmp(id, preFix, 3) == 0) {
-        return 1; 
-    } 
-    else {
-        return 0;
-    }
-}
-int isValidName(char *name) {
-    int hasLetter = 0;
-    int len = strlen(name);
-
-    if(len == 0) return 0;
-    if(name[0] == ' ' || name[len - 1] == ' ') {
-        return 0;
-    }
-    int i = 0;
-    for(; i < len; i++){
-        char c = name[i];
-        // Không cho 2 space liên tiếp
-        //đồng thời check ko cho đầu và kết thúc chuỗi là 1 space
-        if(i < len -1 && name[i] == ' ' && name[i + 1] == ' '){
-            return 0;
-        }
-        if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-            hasLetter = 1;
-        }
-        else if(c == ' ') {
-            continue;
-        }
-        else {
-            return 0;
-        }
-    }
-    return hasLetter;
-}
-int isValidBirthYear(int year) {
-    int ok = 0;
-    if (year >= 1900 && year <= 2020) {
-        ok = 1;
-    }
-    return ok;
-}
-int isValidMemberShipType(int choice){
-	int ok = 0;
-    if (choice == 1 || choice == 2){
-    	ok = 1;
-    	return ok;
-	}
-  	return ok;
-}
-int searchMemberById(char findId[10], int total, struct memberProfile * members){
-    int i = 0;
-    for(; i < total;i++){
-        if(strcmp(findId, members[i].memberId) == 0){
-            return i;
-        }
-    }
-    return -1;
-}
-int searchMemberByName(char findName[30], int total, struct memberProfile * members){
-    int i = 0;
-    for(; i < total; i++){
-        if(strcmp(findName, members[i].fullName)==0){
-            return i;
-        }
-    }
-    return -1;
-}
-int searchTrainerById(char findId[10], int size, struct trainerProfile trainerList[]){
-    int i = 0;
-    for(; i < size; i++){
-        if(strcmp(findId, trainerList[i].trainerID) == 0){
-            return i;
-        }
-    }
-    return -1;
-}
-//Hàm này chỉ display 1 member khi dùng search
-void displayMember(int i, struct memberProfile * members){
-    struct tm *t = localtime(&members[i].registerTime);
-    printf("%s\t|\t%s\t|\t%d\t|\t%s\t|\t%02d/%02d/%04d\n", 
-                members[i].memberId,
-                members[i].fullName,
-                members[i].birthYear,
-                members[i].memberType,
-                t->tm_mday,
-                t->tm_mon + 1,
-                t->tm_year + 1900);
-    
-}
-void displayMenu(){
-        printf("\n=====MENU====\n");
-        printf("1. Member\n");
-        printf("2. Trainer\n");
-        printf("3. Display\n");
-        printf("4. Export file\n");
-        printf("0. Exit\n");
-}
-void displayMemberMenu(){
-    printf("\n=====MEMBER MENU====\n");
-    printf("1. Add member\n");
-    printf("2. Remove member\n");
-    printf("3. Sort member\n");
-    printf("4. Search member\n");
-    printf("0. Back to main menu\n");
-}
-void addMember(int size, int*total, struct memberProfile **members){
-    struct memberProfile * tmp = realloc(*members, (*total +size) * sizeof(struct memberProfile));
-    if(tmp == NULL){
-        printf("Memory allocation failed!\n");
-        return;
-    }
-    *members = tmp;
-    for(int i = 0; i < size; i++){
-        //tạo index mới trong mảng
-        int idx = (*total) + i; 
-        char inputID[10];
-        //kiểm tra ID
-        do{
-            printf("Enter the #%d member ID: ", idx+1);
-            fgets(inputID, sizeof(inputID), stdin);
-            inputID[strcspn(inputID, "\n")] = '\0';
-            if (!isValidId(inputID)) {
-                printf("Invalid ID format. Must start with GYM.\n");
-            }
-            else if (searchMemberById(inputID, *total, *members) != -1) {
-                printf("This ID already exists.\n");
-            }
-        }
-        while(!isValidId(inputID) || searchMemberById(inputID, *total, *members) != -1);
-        strcpy((*members)[idx].memberId, inputID);
-
-        char inputName[30];
-        //kiểm tra tên
-        do{
-            printf("Enter the name of #%d member: ", idx+1);
-            fgets(inputName, sizeof(inputName), stdin);
-            inputName[strcspn(inputName, "\n")] = '\0';
-            if(!isValidName(inputName)){
-                printf("This name is not valid\n");
-            }
-            if(searchMemberByName(inputName, *total, *members) != -1){
-                printf("This name already exists.\n");
-            }
-            
-        }
-        while(!isValidName(inputName) || searchMemberByName(inputName, *total, *members) != -1);
-        strcpy((*members)[idx].fullName, inputName);
-        int inputYear;
-        //Kiểm tra năm sinh 
-        do{
-            printf("Enter the birthYear of #%d member: ", idx+1);
-            scanf("%d", &inputYear);
-            if(!isValidBirthYear(inputYear)){
-                printf("This birth year is not valid\n");
-            }
-        }
-        while(!isValidBirthYear(inputYear));
-        (*members)[idx].birthYear = inputYear;
-
-        int type;
-        do{
-            printf("Enter the type membership (1. Standard / 2. VIP): ");
-            scanf("%d", &type);
-            clearBuffer();
-            if(isValidMemberShipType(type) != 1){
-                printf("Your choice is not valid, please choose 1 or 2\n");
-            }
-        }
-        while(isValidMemberShipType(type) != 1);
-        if(type == 1) strcpy((*members)[idx].memberType, "Standard");
-        else if(type == 2) strcpy((*members)[idx].memberType, "VIP");
-        (*members)[idx].registerTime = time(NULL);
-        }
-    (*total) += size;
-    }
-void sortMemberByBirthYearYoung_to_old(struct memberProfile * members, int total){
-    if(total == 0 || members == NULL){
-        printf("It is a empty list\n");
-    }
-    else{
-        int i =0;
-        for(; i < total - 1; i++){
-            int j = 0;
-            for(; j < total - 1 - i; j++){
-                if(members[j].birthYear < members[j+1].birthYear){
-                    struct memberProfile temp = members[j];
-                    members[j] = members[j+1];
-                    members[j+1] = temp;
-                }
-            }
-        }
-        printf("Sort succesfully\n");
-    }
-
-}
-void sortMemberByBirthYearOlder_to_young(struct memberProfile *members, int total){
-    if(total == 0 || members == NULL){
-        printf("It is a empty list\n");
-    }
-    else{
-        int i =0;
-        for(; i < total - 1; i++){
-            int j = 0;
-            for(; j < total - 1 - i; j++){
-                if(members[j+1].birthYear < members[j].birthYear){
-                    struct memberProfile temp = members[j];
-                    members[j] = members[j+1];
-                    members[j+1] = temp;
-                }
-            }
-        }
-        printf("Sort succesfully\n");
-    }
-}
-void sortByDateLastest(struct memberProfile * members, int total){
-    for(int i = 0; i < total - 1; i++){
-        for(int j = 0; j < total - i - 1; j++){
-            if( members[j].registerTime > members[j+1].registerTime ){
-                struct memberProfile temp = members[j];
-                    members[j] = members[j+1];
-                    members[j+1] = temp;
-            }
-        }
-    }
-    printf("Sort succesfully\n");
-}
-void sortByDateOldest(struct memberProfile * members, int total){
-    for(int i = 0; i < total - 1; i++){
-        for(int j = 0; j < total - i - 1; j++){
-            if( members[j].registerTime < members[j+1].registerTime ){
-                struct memberProfile temp = members[j];
-                    members[j] = members[j+1];
-                    members[j+1] = temp;
-            }
-        }
-    }
-    printf("Sort succesfully\n");
-}
-
-void displaySortMenu(){
-    printf("\n=====SORT MENU=====\n");
-    printf("1. Youngest to oldest\n");
-    printf("2. Oldest to youngest\n");
-    printf("3. Lastest to oldest\n");
-    printf("4. Oldest to lastest\n");
-    printf("0. Back to main menu\n");
-}
-void displayAllMember(int total, struct memberProfile*members){
-    if(total == 0 || members == NULL){
-        printf("This list is empty");
-    }
-    else{
-        printf("\n===== MEMBER LIST =====\n");
-        for(int i = 0; i < total; i++){
-            struct tm *t = localtime(&members[i].registerTime);
-            printf("%s\t|\t%s\t|\t%d\t|\t%s\t|\t%02d/%02d/%04d\n", 
-                members[i].memberId,
-                members[i].fullName,
-                members[i].birthYear,
-                members[i].memberType,
-                t->tm_mday,
-                t->tm_mon + 1,
-                t->tm_year + 1900);
-        }
-    }
-}
-void displayFileMenu(){
-    printf("\n===== FILE MENU =====\n");
-    printf("1. Save data to file\n");
-    printf("2. Load data from file\n");
-    printf("0. Back to main menu\n");
-}
-void displayTrainerMenu(){
-    printf("\n=====TRAINER MENU=====\n");
-    printf("1. Assign trainer\n");
-    printf("2. Revenue\n");
-    printf("3. Group members\n");
-    printf("4. Search\n");
-}
-void displaySearchmenu(){
-    printf("\n=====SEARCH MENU=====\n");
-    printf("1. Search by id\n");
-    printf("2. Search by name\n");
-}
-void displayTrainer(int idx, struct trainerProfile trainerList[]){
-    printf("%s\t%s\n",
-        trainerList[idx].trainerID,
-        trainerList[idx].trainerName);
-}
-void exportingData(FILE * fptr){
-
-}
-void saveDataToFile( struct memberProfile * members, int total){
-    char input[30];
-    char fName[40];
-    printf("Enter your name file : ");
-    fgets(input, sizeof(input), stdin);
-    input[strcspn(input, "\n")] = '\0';
-    snprintf(fName, sizeof(fName), "%s.txt", input);
-    FILE * fptr;
-    fptr = fopen(fName, "w");
-    if(!fptr){
-        printf("Cannot create file\n");
-        return;
-    }
-    else{
-        for(int i = 0; i < total; i++){
-            struct tm *t = localtime(&members[i].registerTime);
-            if (t == NULL) continue;
-            fprintf(fptr,
-                "ID: %s\n"
-                "Name: %s\n"
-                "Birth Year: %d\n"
-                "Type: %s\n"
-                "Register Date: %02d/%02d/%04d\n"
-                "-----------------------\n",
-                members[i].memberId,
-                members[i].fullName,
-                members[i].birthYear,
-                members[i].memberType,
-                t->tm_mday,
-                t->tm_mon + 1,
-                t->tm_year + 1900);
-        }
-        printf("Export successfully\n");
-        fclose(fptr);
-    }
-}
-void clearBuffer(){
-    while (getchar() != '\n');
-}
-
-
-
-
-
-
-
-
-
-
-
-
